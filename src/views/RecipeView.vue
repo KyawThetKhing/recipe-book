@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-const route = useRoute();
-console.log(route.params.id);
+import { useRecipeStore } from '@/stores/recipe';
 
 /**
  * NOTE:
@@ -20,15 +19,23 @@ console.log(route.params.id);
  * watch will call the function even the route is the same (eg: http://localhost:5173/recipe/123 -> http://localhost:5173/recipe/123)
  * set immediate: true to call the function immediately (to fetch the data like onMounted)
  */
-watch(
-  () => route.params.id,
-  () => console.log('Fetching data inside watch'),
-  {
-    immediate: true,
-  },
-);
+// watch(
+//   () => route.params.id,
+//   () => console.log('Fetching data inside watch'),
+//   {
+//     immediate: true,
+//   },
+// );
+
+const route = useRoute();
+const recipeStore = useRecipeStore();
+
+const recipe = computed(() => recipeStore.getRecipeById(route.params.id as string));
 </script>
 
 <template>
-  <div>Recipe {{ $route.params.id }}</div>
+  <div>
+    <h1>{{ recipe?.name }}</h1>
+    <p>{{ recipe?.description }}</p>
+  </div>
 </template>
