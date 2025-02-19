@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { useRecipeStore } from '@/stores/recipe';
 
@@ -31,11 +31,24 @@ const route = useRoute();
 const recipeStore = useRecipeStore();
 
 const recipe = computed(() => recipeStore.getRecipeById(route.params.id as string));
+const isFavorite = computed(() => (recipe.value ? recipeStore.isFavorite(recipe.value.id) : false));
 </script>
 
 <template>
   <div>
-    <h1>{{ recipe?.name }}</h1>
-    <p>{{ recipe?.description }}</p>
+    <h1 class="text-2xl font-bold">{{ recipe?.name }}</h1>
+    <p class="hover:underline">{{ recipe?.description }}</p>
+    <div class="flex items-center gap-4">
+      <RouterLink :to="{ name: 'edit-recipe', params: { id: recipe?.id } }" class="underline">
+        Edit
+      </RouterLink>
+      <button
+        v-if="recipe"
+        @click="recipeStore.toggleFavorite(recipe?.id)"
+        class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+      >
+        {{ isFavorite ? 'Remove from favorites' : 'Add to favorites' }}
+      </button>
+    </div>
   </div>
 </template>

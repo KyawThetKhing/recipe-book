@@ -1,27 +1,41 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { ref, watch } from 'vue';
 import { useRecipeStore } from '@/stores/recipe';
 
 const router = useRouter();
+const route = useRoute();
 const name = ref('');
 const description = ref('');
 const recipeStore = useRecipeStore();
 
-const addRecipe = () => {
+const editRecipe = () => {
   // implement add recipe
-  const recipe = recipeStore.addRecipe({
+  recipeStore.editRecipe(route.params.id as string, {
     name: name.value,
     description: description.value,
   });
 
-  router.push({ name: 'recipe', params: { id: recipe.id } });
+  router.push({ name: 'recipe', params: { id: route.params.id } });
 };
+
+watch(
+  () => route.params.id as string,
+  (id: string) => {
+    if (!id) router.push({ name: 'not-found' });
+    const recipe = recipeStore.getRecipeById(id);
+    if (!recipe) router.push({ name: 'not-found' });
+
+    name.value = recipe?.name || '';
+    description.value = recipe?.description || '';
+  },
+  { immediate: true },
+);
 </script>
 <template>
-  <h1 class="text-2xl font-bold m-4">Add Form</h1>
+  <h1 class="text-2xl font-bold m-4">Edit Form</h1>
 
-  <form @submit.prevent="addRecipe" class="space-y-4">
+  <form @submit.prevent="editRecipe" class="space-y-4">
     <div>
       <input
         type="text"
@@ -39,7 +53,7 @@ const addRecipe = () => {
       ></textarea>
     </div>
     <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
-      Add
+      Edit
     </button>
   </form>
 </template>
